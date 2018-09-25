@@ -8,7 +8,7 @@ import torch.optim.lr_scheduler as sched
 from tqdm import tqdm
 from utils import to_var
 
-from gen_model import ZipNet
+from model import ZipNet
 
 
 class Solver(object):
