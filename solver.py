@@ -117,7 +117,7 @@ class Solver(object):
         """
         path = os.path.join(
             self.model_save_path,
-            '{}.pth'.format(e + 1)
+            '{}/{}.pth'.format(self.version, e + 1)
         )
 
         torch.save(self.model.state_dict(), path)
