@@ -44,6 +44,7 @@ def main(version, config):
 
     # create directories if not exist
     mkdir(config.log_path)
+    config.model_save_path = os.path.join(config.model_save_path, version)
     mkdir(config.model_save_path)
 
     if config.mode == 'train':

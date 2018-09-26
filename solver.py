@@ -117,8 +117,9 @@ class Solver(object):
         """
         path = os.path.join(
             self.model_save_path,
-            '/{}/{}--{}.pth'.format(self.version, e + 1, i + 1)
+            '{}--{}.pth'.format(e + 1, i + 1)
         )
+
         torch.save(self.model.state_dict(), path)
 
     def model_step(self, images, labels):
