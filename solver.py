@@ -115,7 +115,7 @@ class Solver(object):
         """
         path = os.path.join(
             self.model_save_path,
-            '{}_{}_{}.pth'.format(self.version, e + 1, i + 1)
+            '/{}/{}--{}.pth'.format(self.version, e + 1, i + 1)
         )
         torch.save(self.model.state_dict(), path)
 
@@ -156,7 +156,7 @@ class Solver(object):
 
         # start with trained model if exists
         if self.pretrained_model:
-            start = int(self.pretrained_model.split('_')[3])
+            start = int(self.pretrained_model.split('--')[0])
         else:
             start = 0
 
