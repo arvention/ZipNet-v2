@@ -18,6 +18,7 @@ class Hdf5Dataset(Dataset):
         self.y = data_file[y_key]
         self.N = self.x.shape[0]
 
+        # transform data
         self.transform = transforms.Compose(
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
