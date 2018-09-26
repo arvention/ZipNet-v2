@@ -29,7 +29,7 @@ class Solver(object):
 
         # TODO: build tensorboard
 
-        # start with a trained model
+        # start with a pre-trained model
         if self.pretrained_model:
             self.load_pretrained_model()
 
@@ -45,19 +45,18 @@ class Solver(object):
         self.criterion = nn.CrossEntropyLoss()
 
         # instantiate optimizer
-        self.optimizer = optim.SGD(
-            self.model.parameters(),
-            lr=self.lr,
-            momentum=self.momentum
-        )
+        self.optimizer = optim.SGD(self.model.parameters(),
+                                   lr=self.lr,
+                                   momentum=self.momentum)
 
         self.scheduler = scheduler.StepLR(self.optimizer,
                                           step_size=40,
                                           gamma=0.1)
 
-        # print networks
+        # print network
         self.print_network(self.model, 'ZipNet')
 
+        # use gpu if enabled
         if torch.cuda.is_available() and self.use_gpu:
             self.model.cuda()
             self.criterion.cuda()
@@ -79,7 +78,7 @@ class Solver(object):
         """
         self.model.load_state_dict(torch.load(os.path.join(
             self.model_save_path, '{}.pth'.format(self.pretrained_model))))
-        print('loaded trained model (step: {})'.format(self.pretrained_model))
+        print('loaded trained model ver {}'.format(self.pretrained_model))
 
     def print_loss_log(self, start_time, iters_per_epoch, e, i, loss):
         """
@@ -96,7 +95,7 @@ class Solver(object):
         total_time = str(datetime.timedelta(seconds=total_time))
         elapsed = str(datetime.timedelta(seconds=elapsed))
 
-        log = "Elapsed {}/{} -- {} , Epoch [{}/{}], Iter [{}/{}], " \
+        log = "Elapsed {}/{} -- {}, Epoch [{}/{}], Iter [{}/{}], " \
               "loss: {:.4f}".format(elapsed,
                                     epoch_time,
                                     total_time,
@@ -104,8 +103,7 @@ class Solver(object):
                                     self.num_epochs,
                                     i + 1,
                                     iters_per_epoch,
-                                    loss
-                                    )
+                                    loss)
 
         # TODO: add tensorboard
 
@@ -156,7 +154,7 @@ class Solver(object):
 
         iters_per_epoch = len(self.data_loader)
 
-        # start with trained model if exists
+        # start with a trained model if exists
         if self.pretrained_model:
             start = int(self.pretrained_model.split('--')[0])
         else:
@@ -207,11 +205,13 @@ class Solver(object):
         Returns the count of top 1 and top 5 predictions
         """
 
+        # set the model to eval mode
         self.model.eval()
 
         top_1_correct = 0
         top_5_correct = 0
         total = 0
+
         with torch.no_grad():
             for images, labels in data_loader:
 
@@ -226,7 +226,7 @@ class Solver(object):
                 _, top_1_output = torch.max(output.data, dim=1)
 
                 top_1_correct += torch.sum(torch.eq(labels.squeeze(),
-                                           top_1_output))
+                                                    top_1_output))
 
                 # top 5
                 _, top_5_output = torch.topk(output.data, k=5, dim=1)
