@@ -26,8 +26,8 @@ def save_config(config):
         for k, v in sorted(args.items()):
             f.write('%s: %s\n' % (str(k), str(v)))
 
-    zipf = zipfile.ZipFile(save_name.format(
-        current_time, "zip"), 'w', zipfile.ZIP_DEFLATED)
+    zipf = zipfile.ZipFile(save_name.format(current_time, "zip"),
+                           'w', zipfile.ZIP_DEFLATED)
     zipdir('.', zipf)
     zipf.close()
 
