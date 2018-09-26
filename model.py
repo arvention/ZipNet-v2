@@ -6,13 +6,11 @@ import torch.nn.init as init
 class ZipLayer(nn.Module):
     """Zip Module"""
 
-    def __init__(
-        self,
-        in_channels,
-        squeeze_channels,
-        e1x1_channels,
-        e3x3_channels
-    ):
+    def __init__(self,
+                 in_channels,
+                 squeeze_channels,
+                 e1x1_channels,
+                 e3x3_channels):
         super(ZipLayer, self).__init__()
 
         self.in_channels = in_channels
@@ -108,116 +106,100 @@ class ZipBlock(nn.Module):
         return self.net(x)
 
 
+"""
+different configurations of ZipNet
+"""
+
+configs = {
+    'A': [64, [64, 4, 4, 2, 2], [256, 2, 8, 1, 1], [256, 4, 8, 2, 3]]
+}
+
+
 class ZipNet(nn.Module):
 
-    """ZFNetLite"""
+    """ZipNet"""
 
-    def __init__(
-        self,
-        channels,
-        class_count
-    ):
+    def __init__(self,
+                 config,
+                 channels,
+                 class_count):
         super(ZipNet, self).__init__()
+        self.config = configs[config]
         self.channels = channels
         self.class_count = class_count
 
         self.conv_net = self.get_conv_net()
-        self.fc_net = self.get_fc_net()
-
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                if m is self.final_conv:
-                    init.normal_(m.weight, mean=0.0, std=0.01)
-
-                else:
-                    init.kaiming_uniform_(m.weight)
-
-                if m.bias is not None:
-                    init.constant_(m.bias, 0)
 
     def get_conv_net(self):
         layers = []
 
-        # in_channels = self.channels, out_channels = 64
-        # kernel_size = 3x3, stride = 2
-        layers.append(nn.Conv2d(self.channels, 64, kernel_size=3, stride=2))
+        layers.append(nn.Conv2d(in_channels=self.channels,
+                                out_channels=self.config[0],
+                                kernel_size=3,
+                                stride=2))
+        layers.append(nn.BatchNorm2d(num_features=self.config[0]))
         layers.append(nn.ReLU(inplace=True))
-        layers.append(nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True))
-        layers.append(nn.BatchNorm2d(num_features=64))
+        layers.append(nn.MaxPool2d(kernel_size=2,
+                                   stride=2,
+                                   ceil_mode=True))
 
-        # in_channels = 64, squeeze_channels = 16
-        # e1x1_channels = 32, e3x3_channels = 32 -> out_channels = 64
-        # layers.append(ZipModule(64, 16, 32, 32))
+        layers.append(ZipBlock(in_channels=self.config[1][0],
+                               num_layers=self.config[1][1],
+                               compress_factor=self.config[1][2],
+                               expand_factor=self.config[1][3],
+                               expand_interval=self.config[1][4]))
+        layers.append(nn.MaxPool2d(kernel_size=2,
+                                   stride=2,
+                                   ceil_mode=True))
 
-        # in_channels = 64, squeeze_channels = 16
-        # e1x1_channels = 64, e3x3_channels = 64 -> out_channels = 128
-        # layers.append(ZipModule(64, 16, 64, 64))
+        layers.append(ZipBlock(in_channels=self.config[2][0],
+                               num_layers=self.config[2][1],
+                               compress_factor=self.config[2][2],
+                               expand_factor=self.config[2][3],
+                               expand_interval=self.config[2][4]))
+        layers.append(nn.MaxPool2d(kernel_size=2,
+                                   stride=2,
+                                   ceil_mode=True))
 
-        # in_channels = 128, squeeze_channels = 16
-        # e1x1_channels = 64, e3x3_channels = 64 -> out_channels = 128
-        # layers.append(ZipModule(128, 16, 64, 64))
+        layers.append(ZipBlock(in_channels=self.config[3][0],
+                               num_layers=self.config[3][1],
+                               compress_factor=self.config[3][2],
+                               expand_factor=self.config[3][3],
+                               expand_interval=self.config[3][4]))
 
-        # in_channels = 128, squeeze_channels = 16
-        # e1x1_channels = 64, e3x3_channels = 64 -> out_channels = 128
-        # layers.append(ZipModule(128, 16, 64, 64))
-        layers.append(ZipBlock(in_channels=64,
-                               num_layers=4,
-                               compress_factor=4,
-                               expand_factor=2,
-                               expand_interval=2))
+        expand_count = self.config[3][1] // self.config[3][4]
+        final_channels = self.config[3][0]
+        for i in range(expand_count):
+            final_channels *= self.config[3][3]
 
-        layers.append(nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True))
-
-        # in_channels = 128, squeeze_channels = 32
-        # e1x1_channels = 128, e3x3_channels = 128 -> out_channels = 256
-        # layers.append(ZipModule(128, 32, 128, 128))
-
-        # in_channels = 256, squeeze_channels = 32
-        # e1x1_channels = 128, e3x3_channels = 128 -> out_channels = 256
-        # layers.append(ZipModule(256, 32, 128, 128))
-        layers.append(ZipBlock(in_channels=256,
-                               num_layers=2,
-                               compress_factor=8,
-                               expand_factor=1,
-                               expand_interval=1))
-
-        layers.append(nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True))
-
-        # in_channels = 256, squeeze_channels = 48
-        # e1x1_channels = 192, e3x3_channels = 192 -> out_channels = 384
-        # layers.append(ZipModule(256, 48, 192, 192))
-
-        # in_channels = 384, squeeze_channels = 48
-        # e1x1_channels = 192, e3x3_channels = 192 -> out_channels = 384
-        # layers.append(ZipModule(384, 48, 192, 192))
-
-        # in_channels = 384, squeeze_channels = 64
-        # e1x1_channels = 256, e3x3_channels = 256 -> out_channels = 512
-        # layers.append(ZipModule(384, 64, 256, 256))
-
-        # in_channels = 512, squeeze_channels = 64
-        # e1x1_channels = 256, e3x3_channels = 256 -> out_channels = 512
-        # layers.append(ZipModule(512, 64, 256, 256))
-        layers.append(ZipBlock(in_channels=256,
-                               num_layers=4,
-                               compress_factor=8,
-                               expand_factor=2,
-                               expand_interval=2))
-        return nn.Sequential(*layers)
-
-    def get_fc_net(self):
-        layers = []
-
-        self.final_conv = nn.Conv2d(1024, self.class_count, kernel_size=1)
+        self.final_conv = nn.Conv2d(in_channels=final_channels,
+                                    out_channels=self.class_count,
+                                    kernel_size=1)
 
         layers.append(nn.Dropout())
         layers.append(self.final_conv)
+        layers.append(nn.BatchNorm2d(num_features=self.class_count))
         layers.append(nn.ReLU(inplace=True))
-        layers.append(nn.AvgPool2d(13, stride=1))
 
         return nn.Sequential(*layers)
 
+    def init_weights(self):
+        """
+        initializes weights for each layer
+        """
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                if module is self.final_conv:
+                    init.normal_(module.weight, mean=0.0, std=0.01)
+
+                else:
+                    init.kaiming_uniform_(module.weight)
+
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
     def forward(self, x):
         y = self.conv_net(x)
-        y = self.fc_net(y)
+        pool = nn.AvgPool2d(y.size(2), stride=1)
+        y = pool(y)
         return y.view(y.size(0), self.class_count)
