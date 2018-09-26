@@ -52,8 +52,8 @@ class Solver(object):
                                    momentum=self.momentum)
 
         self.scheduler = scheduler.StepLR(self.optimizer,
-                                          step_size=40,
-                                          gamma=0.1)
+                                          step_size=self.sched_step_size,
+                                          gamma=self.sched_gamma)
 
         # print network
         self.print_network(self.model, 'ZipNet')
