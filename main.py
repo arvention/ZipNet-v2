@@ -75,6 +75,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--pretrained_model', type=str,
                         default=None)
+    parser.add_argument('--config', type=str, default='A',
+                        choices=['A'])
 
     # misc
     parser.add_argument('--mode', type=str, default='train',
