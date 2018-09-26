@@ -180,10 +180,10 @@ class Solver(object):
                 self.save_model(e, i)
 
             # evaluate on train dataset
-            # if (e + 1) % self.train_eval_step == 0:
-            #    top_1_acc, top_5_acc = self.train_evaluate(e)
-            #    self.top_1_acc.append((e, top_1_acc))
-            #    self.top_5_acc.append((e, top_5_acc))
+            if (e + 1) % self.train_eval_step == 0:
+                top_1_acc, top_5_acc = self.train_evaluate(e)
+                self.top_1_acc.append((e, top_1_acc))
+                self.top_5_acc.append((e, top_5_acc))
 
         # print losses
         print('\n--Losses--')
