@@ -4,7 +4,7 @@ import time
 import datetime
 import torch.nn as nn
 import torch.optim as optim
-import torch.optim.lr_scheduler as sched
+import torch.optim.lr_scheduler as scheduler
 from tqdm import tqdm
 from utils import to_var
 
@@ -51,7 +51,9 @@ class Solver(object):
             momentum=self.momentum
         )
 
-        self.scheduler = sched.StepLR(self.optimizer, step_size=70, gamma=0.1)
+        self.scheduler = scheduler.StepLR(self.optimizer,
+                                          step_size=40,
+                                          gamma=0.1)
 
         # print networks
         self.print_network(self.model, 'ZipNet')
