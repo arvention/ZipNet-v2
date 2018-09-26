@@ -111,13 +111,13 @@ class Solver(object):
 
         print(log)
 
-    def save_model(self, e, i):
+    def save_model(self, e):
         """
-        Saves a model per e epoch and i iterations
+        Saves a model per e epoch
         """
         path = os.path.join(
             self.model_save_path,
-            '{}--{}.pth'.format(e + 1, i + 1)
+            '{}.pth'.format(e + 1)
         )
 
         torch.save(self.model.state_dict(), path)
@@ -159,7 +159,7 @@ class Solver(object):
 
         # start with a trained model if exists
         if self.pretrained_model:
-            start = int(self.pretrained_model.split('--')[0])
+            start = int(self.pretrained_model.split('/')[-1])
         else:
             start = 0
 
