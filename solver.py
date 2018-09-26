@@ -180,7 +180,7 @@ class Solver(object):
 
             # save model
             if (e + 1) % self.model_save_step == 0:
-                self.save_model(e, i)
+                self.save_model(e)
 
             # evaluate on train dataset
             # if (e + 1) % self.train_eval_step == 0:
