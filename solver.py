@@ -38,8 +38,10 @@ class Solver(object):
         Instantiate the model, loss criterion, and optimizer
         """
 
-        # instantiate ZipNet model
-        self.model = ZipNet(self.input_channels, self.class_count)
+        # instantiate model
+        self.model = ZipNet(config=self.config,
+                            channels=self.input_channels,
+                            class_count=self.class_count)
 
         # instantiate loss criterion
         self.criterion = nn.CrossEntropyLoss()
