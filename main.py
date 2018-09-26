@@ -46,8 +46,8 @@ def main(version, config):
     mkdir(config.log_path)
 
     if config.mode == 'train':
-        config.model_save_path = os.path.join(config.model_save_path, version)
-        mkdir(config.model_save_path)
+        temp_save_path = os.path.join(config.model_save_path, version)
+        mkdir(temp_save_path)
 
         data_loader = get_loader(config.data_path + config.train_data_path,
                                  config.train_x_key, config.train_y_key,
